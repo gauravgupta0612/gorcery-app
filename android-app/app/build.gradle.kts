@@ -17,7 +17,7 @@ val keystoreProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
-val apiBaseUrl: String = (project.findProperty("golaApiBaseUrl") as String?) ?: "http://10.0.2.2:8080/"
+val apiBaseUrl: String = (project.findProperty("golaApiBaseUrl") as String?) ?: "http://10.0.2.2:8095/"
 
 android {
     namespace = "com.golagrocery.app"

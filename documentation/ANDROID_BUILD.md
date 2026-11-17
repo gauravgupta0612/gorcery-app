@@ -10,7 +10,7 @@ cd android-app
 Install on a device/emulator: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
 Point the app at your backend without editing files:
-`./gradlew assembleDebug -PgolaApiBaseUrl=http://192.168.1.20:8080/` (must end with `/`).
+`./gradlew assembleDebug -PgolaApiBaseUrl=http://192.168.1.20:8095/` (must end with `/`).
 Debug builds allow plain HTTP; **release builds require HTTPS** (`res/xml/network_security_config.xml`).
 
 ## Signed release APK / AAB

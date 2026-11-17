@@ -1,0 +1,25 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', 'database/**', '.github/workflows/backend.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Test and package
+        working-directory: backend
+        run: mvn -B -ntp test package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gola-grocery-backend-jar
+          path: backend/target/gola-grocery-backend-*.jar

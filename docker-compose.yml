@@ -1,5 +1,5 @@
 # Local full stack:  docker compose --env-file backend/.env up --build
-# Services: PostgreSQL 16, Spring Boot API (port 8080), admin dashboard (port 5173 -> nginx)
+# Services: PostgreSQL 16, Spring Boot API (port 8095), admin dashboard (port 5173 -> nginx)
 services:
   db:
     image: postgres:16-alpine
@@ -32,7 +32,7 @@ services:
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
       RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
       FIREBASE_CREDENTIALS_FILE: ${FIREBASE_CREDENTIALS_FILE:-}
-    ports: ["8080:8080"]
+    ports: ["8095:8095"]
     volumes: [gola-uploads:/app/uploads]
 
   admin:

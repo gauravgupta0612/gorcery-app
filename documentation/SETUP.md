@@ -29,7 +29,7 @@ mvn spring-boot:run
 ```
 bash/zsh: `set -a; source .env; set +a; mvn spring-boot:run`
 
-Check: http://localhost:8080/actuator/health → `{"status":"UP"}`.
+Check: http://localhost:8095/actuator/health → `{"status":"UP"}`.
 
 Useful development values in `.env`: `OTP_DEV_ECHO=true` (OTP returned in API + shown in the app), `PAYMENTS_MODE=mock`.
 Store hours are 06:00–23:30 IST by default (checkout is refused outside them) — change in Admin → Store settings.
@@ -40,15 +40,15 @@ Tests: `mvn test` (unit tests: pricing/GST maths, JWT, Razorpay signature verifi
 ```bash
 cd admin-dashboard
 npm install
-npm run dev          # http://localhost:5173 (proxies /api and /files to :8080)
+npm run dev          # http://localhost:5173 (proxies /api and /files to :8095)
 npm test             # unit tests
 npm run build        # production build in dist/
 ```
 
 ## 4. Android app
 See `ANDROID_BUILD.md`. Backend URL is set in `android-app/gradle.properties` (`golaApiBaseUrl`).
-- Emulator: `http://10.0.2.2:8080/` (default)
-- Phone on same Wi-Fi: `http://<PC-LAN-IP>:8080/` and allow port 8080 in Windows Firewall.
+- Emulator: `http://10.0.2.2:8095/` (default)
+- Phone on same Wi-Fi: `http://<PC-LAN-IP>:8095/` and allow port 8095 in Windows Firewall.
 
 ## 5. Accounts for testing
 - **Admin**: created from `ADMIN_PHONE` / `ADMIN_PASSWORD` on startup.

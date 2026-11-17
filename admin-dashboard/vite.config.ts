@@ -7,8 +7,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: process.env.VITE_BACKEND_URL ?? 'http://localhost:8080', changeOrigin: true },
-      '/files': { target: process.env.VITE_BACKEND_URL ?? 'http://localhost:8080', changeOrigin: true },
+      '/api': { target: process.env.VITE_BACKEND_URL ?? 'http://localhost:8095', changeOrigin: true },
+      '/files': { target: process.env.VITE_BACKEND_URL ?? 'http://localhost:8095', changeOrigin: true },
     },
   },
   test: { environment: 'jsdom' },

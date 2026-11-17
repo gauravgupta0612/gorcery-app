@@ -1,5 +1,5 @@
 # REST API (v1)
-Interactive docs: `http://localhost:8080/swagger-ui.html`. All bodies are JSON; errors are `{ "code", "message", "fields"? }`.
+Interactive docs: `http://localhost:8095/swagger-ui.html`. All bodies are JSON; errors are `{ "code", "message", "fields"? }`.
 
 ## Public
 | Method | Path | Notes |

@@ -10,7 +10,7 @@ Exercises the complete flow against a RUNNING backend:
 
 Requirements on the backend:  OTP_DEV_ECHO=true  and  PAYMENTS_MODE=mock
 Usage:
-  python scripts/smoke_test.py --base http://localhost:8080 --admin-phone 9999999999 --admin-password '<ADMIN_PASSWORD>'
+  python scripts/smoke_test.py --base http://localhost:8095 --admin-phone 9999999999 --admin-password '<ADMIN_PASSWORD>'
 """
 import argparse, json, random, sys, urllib.error, urllib.request
 
@@ -47,7 +47,7 @@ def step(name, fn):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", default="http://localhost:8080")
+    ap.add_argument("--base", default="http://localhost:8095")
     ap.add_argument("--admin-phone", required=True)
     ap.add_argument("--admin-password", required=True)
     ap.add_argument("--pincode", default="201301")

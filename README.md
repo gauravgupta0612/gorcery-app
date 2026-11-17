@@ -18,9 +18,9 @@
    set -a; source .env; set +a          # PowerShell: see documentation/SETUP.md
    mvn spring-boot:run                   # Flyway creates the schema + 144 products / 164 SKUs on first start
    ```
-   API: http://localhost:8080 · Swagger UI: http://localhost:8080/swagger-ui.html
+   API: http://localhost:8095 · Swagger UI: http://localhost:8095/swagger-ui.html
 3. **Admin dashboard** – `cd admin-dashboard && npm install && npm run dev` → http://localhost:5173 (log in with ADMIN_PHONE / ADMIN_PASSWORD).
-4. **Android** – open `android-app/` in Android Studio (or `./gradlew assembleDebug`). The emulator reaches your PC at `http://10.0.2.2:8080/` (default). APK: `android-app/app/build/outputs/apk/debug/app-debug.apk`.
+4. **Android** – open `android-app/` in Android Studio (or `./gradlew assembleDebug`). The emulator reaches your PC at `http://10.0.2.2:8095/` (default). APK: `android-app/app/build/outputs/apk/debug/app-debug.apk`.
 5. **Verify everything** – with `OTP_DEV_ECHO=true` and `PAYMENTS_MODE=mock`:
    `python scripts/smoke_test.py --admin-phone <ADMIN_PHONE> --admin-password <ADMIN_PASSWORD>`
 

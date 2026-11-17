@@ -14,5 +14,5 @@ COPY --from=build /src/backend/target/gola-grocery-backend-1.0.0.jar app.jar
 COPY --from=build /src/database/seed-images /app/seed-images
 ENV STORAGE_DIR=/app/uploads SEED_IMAGES_DIR=/app/seed-images
 USER gola
-EXPOSE 8080
+EXPOSE 8095
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]
