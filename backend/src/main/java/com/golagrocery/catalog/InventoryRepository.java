@@ -12,7 +12,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
            nativeQuery = true)
     int tryDeduct(Long variantId, int qty);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    /** No clearAutomatically: clearing would detach the Order being cancelled (LazyInitializationException on history). */
+    @Modifying(flushAutomatically = true)
     @Query(value = "update inventory set quantity = quantity + :qty, version = version + 1, updated_at = now() where variant_id = :variantId",
            nativeQuery = true)
     int restore(Long variantId, int qty);
