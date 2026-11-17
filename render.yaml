@@ -53,3 +53,10 @@ services:
     envVars:
       - key: VITE_API_BASE_URL     # the API URL WITHOUT trailing slash, e.g. https://gola-grocery-api.onrender.com
         sync: false
+
+  # ---------------------------------------------------------------- Public website (product list + policy pages for Razorpay)
+  - type: web
+    name: gola-grocery-web
+    runtime: static
+    buildCommand: echo "static site - regenerate with python scripts/build_website.py"
+    staticPublishPath: ./website
