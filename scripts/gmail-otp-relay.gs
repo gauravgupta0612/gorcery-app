@@ -1,5 +1,5 @@
 /**
- * Gola Grocery - free OTP email relay (Google Apps Script, sends from your Gmail, ~100 emails/day).
+ * Gola Grocery - free email relay for OTPs and order invoices (Google Apps Script, sends from your Gmail, ~100 emails/day).
  *
  * Setup (5 minutes):
  *  1. https://script.google.com -> New project -> replace everything with this file -> Save (name it "Gola OTP relay").
@@ -18,8 +18,17 @@ function doPost(e) {
     var secret = PropertiesService.getScriptProperties().getProperty('RELAY_SECRET');
     if (!secret || body.secret !== secret) return reply({ ok: false, error: 'unauthorized' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.to || '')) return reply({ ok: false, error: 'bad recipient' });
-    if (!/Gola Grocery OTP$/.test(body.subject || '')) return reply({ ok: false, error: 'only OTP emails are allowed' });
-    MailApp.sendEmail({ to: body.to, subject: body.subject, htmlBody: body.html, name: 'Gola Grocery' });
+    var subject = body.subject || '';
+    if (!/Gola Grocery OTP$/.test(subject) && !/^Your Gola Grocery invoice /.test(subject)) {
+      return reply({ ok: false, error: 'only OTP and invoice emails are allowed' });
+    }
+    var mail = { to: body.to, subject: subject, htmlBody: body.html, name: 'Gola Grocery' };
+    if (body.attachments && body.attachments.length) {
+      mail.attachments = body.attachments.slice(0, 2).map(function (a) {
+        return Utilities.newBlob(Utilities.base64Decode(a.base64), a.mimeType || 'application/pdf', a.name || 'invoice.pdf');
+      });
+    }
+    MailApp.sendEmail(mail);
     return reply({ ok: true, remainingQuota: MailApp.getRemainingDailyQuota() });
   } catch (err) {
     return reply({ ok: false, error: String(err) });

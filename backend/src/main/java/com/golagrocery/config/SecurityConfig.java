@@ -33,7 +33,7 @@ public class SecurityConfig {
             .headers(h -> h.contentSecurityPolicy(c -> c.policyDirectives("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'")))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**", "/api/v1/store/**", "/files/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**", "/api/v1/store/**", "/files/**", "/api/v1/public/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/payments/razorpay/webhook").permitAll()
                 .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "STORE_MANAGER")

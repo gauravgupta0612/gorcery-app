@@ -5,6 +5,8 @@ import com.golagrocery.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Component
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class OrderNotifier {
     private final UserRepository users;
     private final NotificationService notifications;
+    private final InvoiceSender invoiceSender;
 
     public void statusChanged(Order o) {
         try {
@@ -21,6 +24,25 @@ public class OrderNotifier {
         } catch (RuntimeException e) {
             // Notifications must never break order processing.
             log.warn("Could not notify user for order {}: {}", o.getId(), e.getMessage());
+        }
+        if (o.getStatus() == OrderStatus.PLACED) sendInvoiceAfterCommit(o.getId(), o.getUserId());
+    }
+
+    /** COD orders are placed at checkout; online orders when payment is confirmed. Send only once the order is saved. */
+    private void sendInvoiceAfterCommit(Long orderId, Long userId) {
+        Runnable send = () -> {
+            try {
+                invoiceSender.send(orderId, userId);
+            } catch (RuntimeException e) {
+                log.warn("Could not queue invoice for order {}: {}", orderId, e.getMessage());
+            }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { send.run(); }
+            });
+        } else {
+            send.run();
         }
     }
 }

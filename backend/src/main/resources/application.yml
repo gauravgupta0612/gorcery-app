@@ -69,6 +69,12 @@ app:
   storage:
     dir: ${STORAGE_DIR:./uploads}
     seed-dir: ${SEED_IMAGES_DIR:../database/seed-images}
+  public-base-url: ${PUBLIC_BASE_URL:https://gola-grocery-api.onrender.com}   # used in invoice download links
+  whatsapp:                                 # Meta WhatsApp Business Cloud API (invoice on WhatsApp). Empty = disabled.
+    token: ${WHATSAPP_TOKEN:}
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    invoice-template: ${WHATSAPP_INVOICE_TEMPLATE:order_invoice}
+    language: ${WHATSAPP_TEMPLATE_LANGUAGE:en}
   payments:
     mode: ${PAYMENTS_MODE:mock}               # razorpay | mock (mock = clearly-labelled TEST payments for local dev)
     razorpay:

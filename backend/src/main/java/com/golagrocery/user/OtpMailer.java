@@ -61,36 +61,59 @@ public class OtpMailer {
 
     public void send(String to, String code, int ttlMinutes) {
         String subject = code + " is your Gola Grocery OTP";
-        String html = body(code, ttlMinutes);
         try {
-            if (relay()) {
-                String payload = json.writeValueAsString(Map.of("secret", relaySecret, "to", to, "subject", subject, "html", html));
-                HttpRequest req = HttpRequest.newBuilder(URI.create(relayUrl)).timeout(Duration.ofSeconds(30))
-                    .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(payload)).build();
-                HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-                Map<?, ?> res;
-                try {
-                    res = json.readValue(resp.body(), Map.class);
-                } catch (Exception parse) {
-                    throw new IllegalStateException("relay HTTP " + resp.statusCode() + " (not JSON - is the web app deployed for 'Anyone'?)");
-                }
-                if (!Boolean.TRUE.equals(res.get("ok"))) {
-                    throw new IllegalStateException("relay refused: " + res.get("error"));
-                }
-                return;
-            }
-            JavaMailSender sender = mailSender.getObject();
-            var msg = sender.createMimeMessage();
-            var h = new MimeMessageHelper(msg, false, "UTF-8");
-            h.setFrom(from, "Gola Grocery");
-            h.setTo(to);
-            h.setSubject(subject);
-            h.setText(html, true);
-            sender.send(msg);
+            deliver(to, subject, body(code, ttlMinutes), null, null);
         } catch (Exception e) {
             log.error("OTP email to {} failed: {}", mask(to), e.getMessage());
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "EMAIL_FAILED", "Couldn't send the OTP email. Please try again in a minute.");
         }
+    }
+
+    /**
+     * Sends any transactional email (e.g. the order invoice) with an optional PDF attachment.
+     * Throws on failure; callers decide whether that matters.
+     */
+    public void sendDocument(String to, String subject, String html, String attachmentName, byte[] pdf) throws Exception {
+        if (!enabled()) throw new IllegalStateException("email is not configured");
+        deliver(to, subject, html, attachmentName, pdf);
+    }
+
+    private void deliver(String to, String subject, String html, String attachmentName, byte[] pdf) throws Exception {
+        if (relay()) {
+            Map<String, Object> body = new java.util.LinkedHashMap<>();
+            body.put("secret", relaySecret);
+            body.put("to", to);
+            body.put("subject", subject);
+            body.put("html", html);
+            if (pdf != null) {
+                body.put("attachments", java.util.List.of(Map.of(
+                    "name", attachmentName, "mimeType", "application/pdf",
+                    "base64", java.util.Base64.getEncoder().encodeToString(pdf))));
+            }
+            HttpRequest req = HttpRequest.newBuilder(URI.create(relayUrl)).timeout(Duration.ofSeconds(30))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build();
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            Map<?, ?> res;
+            try {
+                res = json.readValue(resp.body(), Map.class);
+            } catch (Exception parse) {
+                throw new IllegalStateException("relay HTTP " + resp.statusCode() + " (not JSON - is the web app deployed for 'Anyone'?)");
+            }
+            if (!Boolean.TRUE.equals(res.get("ok"))) {
+                throw new IllegalStateException("relay refused: " + res.get("error"));
+            }
+            return;
+        }
+        JavaMailSender sender = mailSender.getObject();
+        var msg = sender.createMimeMessage();
+        var h = new MimeMessageHelper(msg, pdf != null, "UTF-8");
+        h.setFrom(from, "Gola Grocery");
+        h.setTo(to);
+        h.setSubject(subject);
+        h.setText(html, true);
+        if (pdf != null) h.addAttachment(attachmentName, new org.springframework.core.io.ByteArrayResource(pdf), "application/pdf");
+        sender.send(msg);
     }
 
     private static String body(String code, int ttl) {
