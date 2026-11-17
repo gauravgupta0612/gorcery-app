@@ -15,4 +15,5 @@ COPY --from=build /src/database/seed-images /app/seed-images
 ENV STORAGE_DIR=/app/uploads SEED_IMAGES_DIR=/app/seed-images
 USER gola
 EXPOSE 8095
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]
+# Tuned for small (512 MB) containers such as Render free
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=65", "-XX:+UseSerialGC", "-Xss512k", "-XX:TieredStopAtLevel=1", "-jar", "/app/app.jar"]
