@@ -34,16 +34,10 @@ services:
         value: mock
       - key: SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE
         value: "5"
-      # Email OTP via Brevo (free plan). Username/password = Brevo SMTP login + SMTP key; MAIL_FROM = your verified sender email.
-      - key: SPRING_MAIL_HOST
-        value: smtp-relay.brevo.com
-      - key: SPRING_MAIL_PORT
-        value: "587"
-      - key: SPRING_MAIL_USERNAME
+      # Email OTP: Render free blocks SMTP ports, so mail goes through the HTTPS relay in scripts/gmail-otp-relay.gs
+      - key: MAIL_RELAY_URL
         sync: false
-      - key: SPRING_MAIL_PASSWORD
-        sync: false
-      - key: MAIL_FROM
+      - key: MAIL_RELAY_SECRET
         sync: false
 
   # ---------------------------------------------------------------- Admin dashboard (static site, never sleeps)

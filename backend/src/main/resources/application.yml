@@ -44,6 +44,7 @@ spring:
 
 management:
   endpoints.web.exposure.include: health,info
+  health.mail.enabled: false            # don't let an unreachable SMTP server make /actuator/health slow or DOWN
 
 springdoc:
   swagger-ui.path: /swagger-ui.html
@@ -54,6 +55,9 @@ app:
     access-token-minutes: ${JWT_ACCESS_MINUTES:60}
     refresh-token-days: ${JWT_REFRESH_DAYS:30}
   mail:
+    relay-url: ${MAIL_RELAY_URL:}             # HTTPS email relay (Google Apps Script) - works where SMTP ports are blocked (Render free)
+    relay-secret: ${MAIL_RELAY_SECRET:}
+    smtp-enabled: ${MAIL_SMTP_ENABLED:false}  # set true only on hosts that allow outbound SMTP
     from: ${MAIL_FROM:}                       # verified sender address, e.g. your Brevo login email
   otp:
     length: 6
