@@ -31,9 +31,32 @@ public class BootstrapAdmin implements ApplicationRunner {
             log.info("ADMIN_PHONE/ADMIN_PASSWORD not set - skipping admin bootstrap");
             return;
         }
-        if (users.findByPhone(cfg.phone()).isPresent()) return;
         if (cfg.password().length() < 10) {
-            log.warn("ADMIN_PASSWORD must be at least 10 characters - admin not created");
+            log.warn("ADMIN_PASSWORD must be at least 10 characters - admin account not created/updated");
+            return;
+        }
+        var existing = users.findByPhone(cfg.phone());
+        if (existing.isPresent()) {
+            // ADMIN_PASSWORD is the source of truth: changing it in the environment resets the admin password on next start.
+            User u = existing.get();
+            boolean changed = false;
+            if (u.getPasswordHash() == null || !encoder.matches(cfg.password(), u.getPasswordHash())) {
+                u.setPasswordHash(encoder.encode(cfg.password()));
+                changed = true;
+            }
+            if (u.getRoles().stream().noneMatch(r -> Role.ADMIN.equals(r.getName()))) {
+                u.getRoles().add(roles.findByName(Role.ADMIN).orElseThrow());
+                changed = true;
+            }
+            if (!u.isEnabled() || !u.isPhoneVerified()) {
+                u.setEnabled(true);
+                u.setPhoneVerified(true);
+                changed = true;
+            }
+            if (changed) {
+                users.save(u);
+                log.info("Bootstrap admin account updated from ADMIN_PASSWORD");
+            }
             return;
         }
         User u = new User();

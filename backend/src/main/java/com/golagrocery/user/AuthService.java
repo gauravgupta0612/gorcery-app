@@ -48,8 +48,8 @@ public class AuthService {
         user.setEmail(email);
         user.setPasswordHash(encoder.encode(req.password()));
         users.save(user);
-        String dev = otpService.issue(req.phone(), "REGISTER");
-        return new OtpSentResponse(true, req.phone(), dev);
+        var issued = otpService.issue(req.phone(), "REGISTER", email);
+        return new OtpSentResponse(true, req.phone(), issued.devOtp(), issued.sentTo());
     }
 
     @Transactional
@@ -63,7 +63,8 @@ public class AuthService {
         } else if (user == null) {
             throw ApiException.badRequest("Please register first");
         }
-        return new OtpSentResponse(true, req.phone(), otpService.issue(req.phone(), req.purpose()));
+        var issued = otpService.issue(req.phone(), req.purpose(), user.getEmail());
+        return new OtpSentResponse(true, req.phone(), issued.devOtp(), issued.sentTo());
     }
 
     @Transactional

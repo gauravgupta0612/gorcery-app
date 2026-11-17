@@ -18,10 +18,13 @@ public class OtpService {
     private final PasswordEncoder encoder;
     private final SmsSender sms;
     private final AppProperties props;
+    private final OtpMailer mailer;
 
-    /** @return the plain OTP only when dev-echo is enabled, otherwise null. */
+    /** devOtp is only filled when dev-echo is on; sentTo is the masked email (null when only SMS/log delivery). */
+    public record Issued(String devOtp, String sentTo) {}
+
     @Transactional
-    public String issue(String phone, String purpose) {
+    public Issued issue(String phone, String purpose, String email) {
         if (repo.countByPhoneAndCreatedAtAfter(phone, Instant.now().minus(10, ChronoUnit.MINUTES)) >= 3) {
             throw ApiException.tooMany("Too many OTP requests. Please try again in 10 minutes.");
         }
@@ -32,9 +35,18 @@ public class OtpService {
         otp.setCodeHash(encoder.encode(code));
         otp.setExpiresAt(Instant.now().plus(props.otp().ttlMinutes(), ChronoUnit.MINUTES));
         repo.save(otp);
-        sms.send(phone, code + " is your Gola Grocery verification code. Valid for " + props.otp().ttlMinutes()
-            + " minutes. Do not share it with anyone.");
-        return props.otp().devEcho() ? code : null;
+        String sentTo = null;
+        if (mailer.enabled()) {
+            if (email == null || email.isBlank()) {
+                throw ApiException.badRequest("Add an email address to your account to receive the OTP");
+            }
+            mailer.send(email, code, props.otp().ttlMinutes());
+            sentTo = OtpMailer.mask(email);
+        } else {
+            sms.send(phone, code + " is your Gola Grocery verification code. Valid for " + props.otp().ttlMinutes()
+                + " minutes. Do not share it with anyone.");
+        }
+        return new Issued(props.otp().devEcho() ? code : null, sentTo);
     }
 
     /** Runs in its own transaction so failed attempts are counted even when the caller rolls back. */

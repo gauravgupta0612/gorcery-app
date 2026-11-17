@@ -7,8 +7,9 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val LOGIN = "login"
     const val REGISTER = "register"
-    const val OTP = "otp/{phone}/{purpose}?dev={dev}"
-    fun otp(phone: String, purpose: String, dev: String?) = "otp/$phone/$purpose" + (dev?.let { "?dev=$it" } ?: "")
+    const val OTP = "otp/{phone}/{purpose}?dev={dev}&to={to}"
+    fun otp(phone: String, purpose: String, dev: String?, to: String? = null) =
+        "otp/$phone/$purpose?dev=${dev ?: ""}&to=${Uri.encode(to ?: "")}"
     const val LOCATION = "location"
     const val HOME = "home"
     const val CATEGORIES = "categories"

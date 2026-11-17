@@ -113,7 +113,11 @@ fun GolaNavHost(openOrderId: Long?, onOrderOpened: () -> Unit) {
             composable(Routes.OTP, arguments = listOf(
                 navArgument("phone") { type = NavType.StringType }, navArgument("purpose") { type = NavType.StringType },
                 navArgument("dev") { type = NavType.StringType; nullable = true; defaultValue = null },
-            )) { e -> OtpScreen(nav, e.arguments!!.getString("phone")!!, e.arguments!!.getString("purpose")!!, e.arguments?.getString("dev"), showMessage) }
+                navArgument("to") { type = NavType.StringType; nullable = true; defaultValue = null },
+            )) { e ->
+                OtpScreen(nav, e.arguments!!.getString("phone")!!, e.arguments!!.getString("purpose")!!,
+                    e.arguments?.getString("dev")?.ifBlank { null }, e.arguments?.getString("to")?.ifBlank { null }, showMessage)
+            }
             composable(Routes.LOCATION) { LocationScreen(nav, showMessage) }
             composable(Routes.HOME) { HomeScreen(nav, showMessage) }
             composable(Routes.CATEGORIES) { CategoriesScreen(nav) }

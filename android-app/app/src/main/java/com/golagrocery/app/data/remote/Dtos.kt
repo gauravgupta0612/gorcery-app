@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
     val isCustomer get() = "CUSTOMER" in roles
 }
 @Serializable data class TokenResponse(val accessToken: String, val refreshToken: String, val expiresIn: Long = 0, val user: UserDto)
-@Serializable data class OtpSentResponse(val otpSent: Boolean = false, val phone: String = "", val devOtp: String? = null)
+@Serializable data class OtpSentResponse(val otpSent: Boolean = false, val phone: String = "", val devOtp: String? = null, val sentTo: String? = null)
 @Serializable data class RegisterRequest(val fullName: String, val phone: String, val email: String?, val password: String)
 @Serializable data class OtpRequest(val phone: String, val purpose: String)
 @Serializable data class VerifyOtpRequest(val phone: String, val code: String, val purpose: String)

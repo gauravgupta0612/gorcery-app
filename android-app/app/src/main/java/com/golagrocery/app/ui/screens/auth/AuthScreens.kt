@@ -55,14 +55,14 @@ class AuthViewModel(private val c: AppContainer) : ViewModel() {
 
     fun requestLoginOtp(phone: String, nav: NavHostController) = launchOp {
         when (val r = c.auth.requestOtp(phone, "LOGIN")) {
-            is ApiResult.Ok -> nav.navigate(Routes.otp(phone, "LOGIN", r.data.devOtp))
+            is ApiResult.Ok -> nav.navigate(Routes.otp(phone, "LOGIN", r.data.devOtp, r.data.sentTo))
             is ApiResult.Err -> error = if (r.status == 404) "No account found for this number. Please create one." else r.message
         }
     }
 
     fun register(name: String, phone: String, email: String, password: String, nav: NavHostController) = launchOp {
         when (val r = c.auth.register(name, phone, email, password)) {
-            is ApiResult.Ok -> nav.navigate(Routes.otp(phone, "REGISTER", r.data.devOtp))
+            is ApiResult.Ok -> nav.navigate(Routes.otp(phone, "REGISTER", r.data.devOtp, r.data.sentTo))
             is ApiResult.Err -> error = r.message
         }
     }
@@ -172,8 +172,8 @@ fun RegisterScreen(nav: NavHostController, showMessage: (String) -> Unit) {
     var phone by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    val valid = name.trim().length >= 2 && PHONE_REGEX.matches(phone) && password.length >= 8 &&
-        (email.isBlank() || android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches())
+    val emailOk = android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+    val valid = name.trim().length >= 2 && PHONE_REGEX.matches(phone) && password.length >= 8 && emailOk
     AuthScaffold {
         Text(stringResource(R.string.register), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(16.dp))
@@ -181,7 +181,8 @@ fun RegisterScreen(nav: NavHostController, showMessage: (String) -> Unit) {
         Spacer(Modifier.height(8.dp))
         PhoneField(phone, { phone = it }, phone.length == 10 && !PHONE_REGEX.matches(phone))
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(email, { email = it.take(160) }, label = { Text(stringResource(R.string.email_optional)) }, singleLine = true,
+        OutlinedTextField(email, { email = it.take(160) }, label = { Text(stringResource(R.string.email_for_otp)) }, singleLine = true,
+            isError = email.isNotBlank() && !emailOk,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         PasswordField(password, { password = it.take(72) }, hint = stringResource(R.string.password_rule))
@@ -195,7 +196,7 @@ fun RegisterScreen(nav: NavHostController, showMessage: (String) -> Unit) {
 }
 
 @Composable
-fun OtpScreen(nav: NavHostController, phone: String, purpose: String, devOtp: String?, showMessage: (String) -> Unit) {
+fun OtpScreen(nav: NavHostController, phone: String, purpose: String, devOtp: String?, sentTo: String?, showMessage: (String) -> Unit) {
     val vm = golaViewModel { AuthViewModel(it) }
     var code by rememberSaveable { mutableStateOf("") }
     var dev by rememberSaveable { mutableStateOf(devOtp) }
@@ -204,7 +205,7 @@ fun OtpScreen(nav: NavHostController, phone: String, purpose: String, devOtp: St
     LaunchedEffect(code) { if (code.length == 6 && !vm.busy) vm.verify(phone, code, purpose, nav) }
     AuthScaffold {
         Text(stringResource(R.string.verify), style = MaterialTheme.typography.headlineSmall)
-        Text(stringResource(R.string.enter_otp, "+91 $phone"), color = GolaColors.Grey)
+        Text(stringResource(R.string.enter_otp, sentTo ?: "+91 $phone"), color = GolaColors.Grey)
         Spacer(Modifier.height(16.dp))
         OutlinedTextField(
             value = code, onValueChange = { v -> code = v.filter(Char::isDigit).take(6) }, singleLine = true,

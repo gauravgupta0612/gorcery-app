@@ -17,6 +17,7 @@
     <string name="mobile_number">मोबाइल नंबर</string>
     <string name="password">पासवर्ड</string>
     <string name="full_name">पूरा नाम</string>
+    <string name="email_for_otp">ईमेल (OTP यहाँ भेजा जाएगा)</string>
     <string name="email_optional">ईमेल (वैकल्पिक)</string>
     <string name="login_with_otp">OTP से लॉग इन करें</string>
     <string name="login_with_password">पासवर्ड से लॉग इन करें</string>

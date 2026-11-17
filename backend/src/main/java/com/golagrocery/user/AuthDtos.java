@@ -11,7 +11,7 @@ public final class AuthDtos {
     public record RegisterRequest(
         @NotBlank @Size(min = 2, max = 120) String fullName,
         @NotBlank @Pattern(regexp = PHONE_REGEX, message = "Enter a valid 10-digit Indian mobile number") String phone,
-        @Email @Size(max = 160) String email,
+        @NotBlank(message = "Email is required - the OTP is sent there") @Email(message = "Enter a valid email") @Size(max = 160) String email,
         @NotBlank @Size(min = 8, max = 72, message = "Password must be 8-72 characters") String password) {}
 
     public record OtpRequest(
@@ -27,7 +27,7 @@ public final class AuthDtos {
 
     public record RefreshRequest(@NotBlank String refreshToken) {}
 
-    public record OtpSentResponse(boolean otpSent, String phone, String devOtp) {}
+    public record OtpSentResponse(boolean otpSent, String phone, String devOtp, String sentTo) {}
 
     public record UserDto(Long id, String fullName, String phone, String email, Set<String> roles, String preferredLanguage) {
         public static UserDto of(User u) {
