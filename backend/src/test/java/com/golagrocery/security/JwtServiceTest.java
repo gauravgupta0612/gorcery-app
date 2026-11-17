@@ -19,7 +19,12 @@ class JwtServiceTest {
         AuthUser u = jwt.parse(token).orElseThrow();
         assertEquals(42L, u.id());
         assertTrue(u.hasRole("CUSTOMER"));
-        assertTrue(jwt.parse(token + "x").isEmpty());
+        // Tamper with the payload (e.g. try to change the user id) - the signature must no longer match.
+        String[] parts = token.split("\\.");
+        char c = parts[1].charAt(5);
+        String tampered = parts[0] + "." + parts[1].substring(0, 5) + (c == 'A' ? 'B' : 'A') + parts[1].substring(6) + "." + parts[2];
+        assertTrue(jwt.parse(tampered).isEmpty(), "tampered token must be rejected");
+        assertTrue(jwt.parse("not-a-jwt").isEmpty());
 
         JwtService other = new JwtService(props(java.util.Base64.getEncoder().encodeToString("a-different-secret-that-is-also-long-enough-987654".getBytes())));
         assertTrue(other.parse(token).isEmpty(), "token signed with another key must be rejected");

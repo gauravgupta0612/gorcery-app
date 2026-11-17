@@ -14,6 +14,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Sort
@@ -122,7 +123,7 @@ fun ProductListScreen(nav: NavHostController, categoryId: Long?, title: String, 
             }
         } else {
             GolaTopBar(title.ifBlank { stringResource(R.string.categories) }, { nav.popBackStack() }) {
-                IconButton(onClick = { nav.navigate(Routes.SEARCH) }) { Icon(androidx.compose.material.icons.Icons.Default.Search, null) }
+                IconButton(onClick = { nav.navigate(Routes.SEARCH) }) { Icon(Icons.Default.Search, null) }
             }
         }
         // Sort & filter bar

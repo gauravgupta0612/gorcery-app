@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -102,7 +104,7 @@ fun MenuRow(icon: ImageVector, label: String, tint: Color = GolaColors.GreenDark
         Icon(icon, null, tint = tint)
         Spacer(Modifier.width(14.dp))
         Text(label, Modifier.weight(1f), color = if (tint == GolaColors.Red) tint else Color.Unspecified)
-        Icon(Icons.Default.KeyboardArrowRight, null, tint = GolaColors.Grey)
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = GolaColors.Grey)
     }
 }
 
