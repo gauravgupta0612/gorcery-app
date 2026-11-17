@@ -28,10 +28,16 @@ services:
         sync: false
       - key: CORS_ORIGINS          # the admin site URL, e.g. https://gola-grocery-admin.onrender.com
         sync: false
-      - key: OTP_DEV_ECHO          # true = OTP shown in the app (no SMS provider yet). Set false once SMS is integrated.
-        value: "true"
-      - key: PAYMENTS_MODE         # mock until Razorpay keys are added
-        value: mock
+      - key: OTP_DEV_ECHO          # false = OTP is only emailed (production). true shows it on screen - testing only.
+        value: "false"
+      - key: PAYMENTS_MODE         # razorpay (live keys in RAZORPAY_* below). mock = fake payments for local dev.
+        value: razorpay
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
       - key: SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE
         value: "5"
       # Email OTP: Render free blocks SMTP ports, so mail goes through the HTTPS relay in scripts/gmail-otp-relay.gs
