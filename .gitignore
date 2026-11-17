@@ -1,0 +1,11 @@
+.env
+*.env.local
+.DS_Store
+.idea/
+.vscode/
+
+# local artefacts
+*.zip
+*.tsbuildinfo
+node_modules/
+__pycache__/
