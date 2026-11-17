@@ -10,8 +10,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -30,7 +35,10 @@ public class OtpMailer {
     private final String from;
     private final String relayUrl;
     private final String relaySecret;
-    private final RestClient http = RestClient.create();
+    private final ObjectMapper json = new ObjectMapper();
+    /** Apps Script answers a POST with a 302 to googleusercontent.com; the result must be fetched with GET. */
+    private final HttpClient http = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL).connectTimeout(Duration.ofSeconds(10)).build();
 
     public OtpMailer(ObjectProvider<JavaMailSender> mailSender,
                      @Value("${spring.mail.host:}") String smtpHost,
@@ -56,12 +64,18 @@ public class OtpMailer {
         String html = body(code, ttlMinutes);
         try {
             if (relay()) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> res = http.post().uri(relayUrl).contentType(MediaType.APPLICATION_JSON)
-                    .body(Map.of("secret", relaySecret, "to", to, "subject", subject, "html", html))
-                    .retrieve().body(Map.class);
-                if (res == null || !Boolean.TRUE.equals(res.get("ok"))) {
-                    throw new IllegalStateException("relay refused: " + (res == null ? "no response" : res.get("error")));
+                String payload = json.writeValueAsString(Map.of("secret", relaySecret, "to", to, "subject", subject, "html", html));
+                HttpRequest req = HttpRequest.newBuilder(URI.create(relayUrl)).timeout(Duration.ofSeconds(30))
+                    .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(payload)).build();
+                HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+                Map<?, ?> res;
+                try {
+                    res = json.readValue(resp.body(), Map.class);
+                } catch (Exception parse) {
+                    throw new IllegalStateException("relay HTTP " + resp.statusCode() + " (not JSON - is the web app deployed for 'Anyone'?)");
+                }
+                if (!Boolean.TRUE.equals(res.get("ok"))) {
+                    throw new IllegalStateException("relay refused: " + res.get("error"));
                 }
                 return;
             }
