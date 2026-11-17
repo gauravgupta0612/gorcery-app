@@ -40,7 +40,18 @@ jobs:
       - name: Unit tests + debug APK
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testDebugUnitTest assembleDebug -PgolaApiBaseUrl="$API_URL"
+          set -o pipefail
+          ./gradlew --no-daemon --continue testDebugUnitTest assembleDebug -PgolaApiBaseUrl="$API_URL" 2>&1 | tee build.log
+
+      - name: Report build errors
+        if: failure()
+        run: |
+          f=build.log
+          [ -f "$f" ] || exit 0
+          grep -nE "^e: |error:|ERROR|FAILED|What went wrong|Caused by|Exception|expected|but was|Tests run:.*Fail|> Task .*FAILED|cannot find symbol|symbol:|location:" "$f" | head -150 > errs.txt || true
+          [ -s errs.txt ] || tail -80 "$f" > errs.txt
+          body=$(sed -e 's/%/%25/g' errs.txt | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Build errors::$body"
 
       - uses: actions/upload-artifact@v4
         with:

@@ -2,3 +2,5 @@ target/
 uploads/
 .env
 *.json.key
+test-output.txt
+build.log
